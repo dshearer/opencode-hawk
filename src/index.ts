@@ -58,21 +58,25 @@ async function getLastMessages(client: OpencodeClient, sessionID: string, n: num
 
 export const ModelHawkClient: Plugin = async ({ client, directory }) => {
     async function log(level: "debug" | "info" | "error" | "warn", msg: string) {
-        const logService = "model-hawk-client";
+        const logService = "opencode-hawk";
         await client.app.log({ body: { service: logService, level: level, message: msg } })
     }
 
     await log("info", "started");
 
-    const app: Application = { value: "my-opencode-session" };
+    // get setttings
+    const port = Number(process.env.OPENCODE_HAWK_DEST_PORT) || 50051;
+    const hn = process.env.OPENCODE_HAWK_DEST_HOST || "localhost";
+    const appValue = process.env.OPENCODE_HAWK_APP || "opencode";
+
+    const app: Application = { value: appValue };
     const reportedTools = new Set<string>();
-    const port = 50051;
     const failClosed = true;
     const lastNMessages = 5;
 
     // Create a gRPC transport pointing at your server
     const transport = new GrpcTransport({
-        host: `localhost:${port}`,
+        host: `${hn}:${port}`,
         channelCredentials: ChannelCredentials.createInsecure(),
     });
 
