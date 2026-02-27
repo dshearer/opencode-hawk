@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "modelhawk",
+      "name": "opencode-hawk",
       "dependencies": {
         "@dshearer/modelhawk": "^0.1.0",
         "@opencode-ai/plugin": "^1.2.10",
