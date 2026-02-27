@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+make -j opencode-plugin
+
+rm -f opencode.log
+
+script/follow-opencode-logs &
+FOLLOW_PID=$!
+trap "kill $FOLLOW_PID 2>/dev/null" EXIT
+
+opencode

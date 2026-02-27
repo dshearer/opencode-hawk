@@ -1,0 +1,44 @@
+#!/bin/bash
+
+LOG_DIR=~/.local/share/opencode/log
+
+get_latest() {
+  ls -t "$LOG_DIR"/*.log 2>/dev/null | head -1
+}
+
+latest=$(get_latest)
+
+if [ -z "$latest" ]; then
+  echo "No log files found in $LOG_DIR"
+  echo "Waiting for log files..."
+  while [ -z "$latest" ]; do
+    sleep 1
+    latest=$(get_latest)
+  done
+fi
+
+tail_pid=""
+
+follow() {
+  [ -n "$tail_pid" ] && kill "$tail_pid" 2>/dev/null
+  echo "Following $1"
+  tail -f "$1" | grep --line-buffered model-hawk-client >> opencode.log &
+  tail_pid=$!
+}
+
+cleanup() {
+  [ -n "$tail_pid" ] && kill "$tail_pid" 2>/dev/null
+  exit 0
+}
+trap cleanup EXIT INT TERM
+
+follow "$latest"
+
+while true; do
+  newest=$(get_latest)
+  if [ "$newest" != "$latest" ]; then
+    latest="$newest"
+    follow "$latest"
+  fi
+  sleep 1
+done
